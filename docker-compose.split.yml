@@ -1,0 +1,54 @@
+name: outbreak-server-split
+
+# Split stack: MariaDB in its own container (easier backups/upgrades). Use:
+#   docker compose -f docker-compose.split.yml up -d --build
+# Same ports on the app container; set EXTERNAL_IP and passwords in .env
+
+services:
+  mariadb:
+    image: mariadb:10.5
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+    volumes:
+      - mariadb_split:/var/lib/mysql
+      - ./docker/mariadb/init/01-databases.sh:/docker-entrypoint-initdb.d/01-databases.sh:ro
+      - ./docker/mariadb/schema-bioserver.sql:/tmp/schema-bioserver.sql:ro
+      - ./docker/mariadb/schema-bioserver2.sql:/tmp/schema-bioserver2.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  outbreak-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VARIANT: split
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+      - "80:80"
+      - "443:443"
+      - "8200:8200"
+      - "8300:8300"
+      - "8590:8590"
+      - "8690:8690"
+    environment:
+      EXTERNAL_IP: ${EXTERNAL_IP}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DB_HOST: mariadb
+    volumes:
+      - outbreak_app_state:/var/lib/outbreak
+    restart: unless-stopped
+
+volumes:
+  mariadb_split:
+  outbreak_app_state:

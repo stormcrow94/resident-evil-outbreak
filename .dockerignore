@@ -1,0 +1,5 @@
+bioserver-docker-upstream
+bioserver-src
+.git
+**/.git
+.env

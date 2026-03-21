@@ -1,0 +1,36 @@
+name: outbreak-server
+
+# All-in-one: MariaDB + Apache (DNAS) + dnsmasq + Java bioservers (File #1 & #2)
+# Requires: EXTERNAL_IP = LAN IP of the host running Docker (as seen by PS2 / PCSX2).
+
+services:
+  outbreak:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VARIANT: allinone
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+      - "80:80"
+      - "443:443"
+      - "8200:8200"
+      - "8300:8300"
+      - "8590:8590"
+      - "8690:8690"
+    environment:
+      EXTERNAL_IP: ${EXTERNAL_IP}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-xxxxxxxxxxxxxxxx}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -S /run/mysqld/mysqld.sock --silent || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+volumes:
+  mariadb_data:
