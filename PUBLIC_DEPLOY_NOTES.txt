@@ -1,7 +1,9 @@
 Biohazard Outbreak — public WAN deploy
 ======================================
 
-Set your public IP in docker-compose.yml: `PUBLIC_IP` (override via environment `PUBLIC_IP`).
+Set your real public IP in docker-compose.yml: `PUBLIC_IP` (override via environment `PUBLIC_IP`).
+
+Examples in this file use 203.0.113.42 — that address is from RFC 5737 (TEST-NET-3), reserved for documentation only. It is not routable on the public Internet. Replace every example with your actual WAN IP.
 
 Changes from upstream (corbin-zip/bioserver-docker)
 --------------------------------------------------
@@ -20,16 +22,16 @@ Forward to this machine’s LAN IP (same host running Docker):
 
 Players (PCSX2 on Windows)
 --------------------------
-Set primary DNS to: YOUR_PUBLIC_IP (same value as PUBLIC_IP). No hosts-file edits required if DNS works.
+Set primary DNS to the same value as PUBLIC_IP (example only: 203.0.113.42). No hosts-file edits required if DNS works.
 
 If your WAN IP changes
 ----------------------
 Edit PUBLIC_IP in docker-compose.yml, then recreate the container. If configs do not update (first-run already ran), exec into the container and sed the same files as entrypoint, or remove the container and fix MySQL duplicate-import issues (see upstream caveats).
 
-Verify from any PC
-------------------
-nslookup gate1.jp.dnas.playstation.org YOUR_PUBLIC_IP
-Should return YOUR_PUBLIC_IP
+Verify from any PC (example — substitute your WAN IP)
+-------------------------------------------------------
+nslookup gate1.jp.dnas.playstation.org 203.0.113.42
+If 203.0.113.42 were your real server, the answer should be that same address.
 
 Commands
 --------

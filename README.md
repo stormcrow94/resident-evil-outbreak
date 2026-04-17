@@ -14,7 +14,8 @@ It builds a Docker image that includes the DNAS replacement (DNASrep) and bioser
 
 ## Quick start (Docker Compose, public IP)
 
-1. Edit `docker-compose.yml` and set `PUBLIC_IP` to your **WAN** (public) IP—the same address players will use for DNS.
+1. Edit `docker-compose.yml` and set `PUBLIC_IP` to your real **WAN** (public) IP—the same address players will use for DNS.  
+   **Documentation examples** use `203.0.113.42` (RFC 5737 TEST-NET-3, documentation-only — not a real routable address). Replace any example with your own IP.
 2. From this directory:
 
 ```bash
@@ -24,7 +25,7 @@ docker logs -f bioserver
 ```
 
 3. On the router, forward the ports listed in `PUBLIC_DEPLOY_NOTES.txt` to the host running Docker.
-4. Players (e.g. PCSX2): set **primary DNS** to that **same** public IP.
+4. Players (e.g. PCSX2): set **primary DNS** to that **same** public IP (again, only `203.0.113.42` in docs as a stand-in example).
 
 See `PUBLIC_DEPLOY_NOTES.txt` for verification commands and firewall details.
 

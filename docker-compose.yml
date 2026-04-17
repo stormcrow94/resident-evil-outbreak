@@ -8,7 +8,7 @@ services:
     container_name: bioserver
     restart: unless-stopped
     environment:
-      # Replace with your WAN (public) IP — same address players use for PCSX2 DNS.
+      # Set your real WAN IP (same address players use for PCSX2 DNS). Docs use 203.0.113.42 as an example only (RFC 5737).
       PUBLIC_IP: "YOUR_PUBLIC_IP"
     ports:
       - "53:53/udp"
