@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:bullseye-slim
 
 # install dependencies
 RUN apt-get update && apt-get install -y \
@@ -34,9 +34,9 @@ RUN ldconfig
 # the top of the document as a variable or loaded externally
 WORKDIR /root
 
-RUN curl -o httpd.tar.gz https://dlcdn.apache.org/httpd/httpd-2.4.56.tar.gz \
-    && curl -o apr.tar.gz https://dlcdn.apache.org//apr/apr-1.7.2.tar.gz \
-    && curl -o apr-util.tar.gz https://dlcdn.apache.org//apr/apr-util-1.6.3.tar.gz \
+RUN curl -o httpd.tar.gz https://archive.apache.org/dist/httpd/httpd-2.4.56.tar.gz \
+    && curl -o apr.tar.gz https://archive.apache.org/dist/apr/apr-1.7.2.tar.gz \
+    && curl -o apr-util.tar.gz https://archive.apache.org/dist/apr/apr-util-1.6.3.tar.gz \
     && tar -xzvf /root/httpd.tar.gz \
     && mv httpd-* httpd
 

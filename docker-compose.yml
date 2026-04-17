@@ -1,0 +1,29 @@
+# Biohazard: Outbreak — public WAN IP via PUBLIC_IP (see config/entrypoint.sh)
+# Players: set PCSX2 primary DNS to the same WAN IP as PUBLIC_IP.
+
+services:
+  bioserver:
+    build: .
+    image: bioserver-docker:local
+    container_name: bioserver
+    restart: unless-stopped
+    environment:
+      # Replace with your WAN (public) IP — same address players use for PCSX2 DNS.
+      PUBLIC_IP: "YOUR_PUBLIC_IP"
+    ports:
+      - "53:53/udp"
+      - "80:80/tcp"
+      - "443:443/tcp"
+      - "8200:8200/tcp"
+      - "8200:8200/udp"
+      - "8300:8300/tcp"
+      - "8300:8300/udp"
+      - "8590:8590/tcp"
+      - "8590:8590/udp"
+      - "8690:8690/tcp"
+      - "8690:8690/udp"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

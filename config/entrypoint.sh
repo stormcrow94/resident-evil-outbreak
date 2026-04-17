@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Public WAN IP for remote players (PCSX2 DNS → this IP). Set in docker-compose or -e PUBLIC_IP=...
+PUBLIC_IP="${PUBLIC_IP:-}"
+if [ -z "$PUBLIC_IP" ] || [ "$PUBLIC_IP" = "YOUR_PUBLIC_IP" ]; then
+	echo "ERROR: Set PUBLIC_IP in docker-compose.yml (or environment) to your server's public WAN IP."
+	exit 1
+fi
+
 mysqld_safe --pid-file=mysqld.pid --socket=/run/mysqld/mysqld.sock --log-error=mysqld_error.log &
 # sleep so mysql fully starts & we can run mysql commands in a moment
 # NOTE: i could possibly utilize /var/lib/mysql/bioserver[1] to check if the commands
@@ -10,12 +17,11 @@ sleep 5s
 # only execute these configuration settings on first run:
 if [ ! -f /root/already-configured ]; then
 	sed -i '26iLD_LIBRARY_PATH="/opt/openssl-1.0.2/lib:$LD_LIBRARY_PATH"' /opt/apache/bin/envvars
-	# replace {{CONTAINER_IP}} & {{EXTERNAL_IP}} with hostname -i
-	# NOTE: i need a way for the user to specify any IP they want
-	# but i -think- that listen-address should be local? could be wrong, need to test
-	sed -i "s/{{CONTAINER_IP}}/$(hostname -i)/g" /etc/dnsmasq.d/obcomsrv
-	sed -i "s/{{EXTERNAL_IP}}/$(hostname -i)/g" /root/bioserver/bioserv1/config.properties
-	sed -i "s/{{EXTERNAL_IP}}/$(hostname -i)/g" /root/bioserver/bioserv2/config.properties
+	# replace {{CONTAINER_IP}} & {{EXTERNAL_IP}} with PUBLIC_IP (WAN address for internet play)
+	# NOTE: listen-address below stays on container IP per upstream README
+	sed -i "s/{{CONTAINER_IP}}/${PUBLIC_IP}/g" /etc/dnsmasq.d/obcomsrv
+	sed -i "s/{{EXTERNAL_IP}}/${PUBLIC_IP}/g" /root/bioserver/bioserv1/config.properties
+	sed -i "s/{{EXTERNAL_IP}}/${PUBLIC_IP}/g" /root/bioserver/bioserv2/config.properties
 	sed -i "s/#listen-address=/listen-address=$(hostname -i),127.0.0.1/g" /etc/dnsmasq.conf
 
 	# use sed to uncomment these 4 lines inside of httpd.conf

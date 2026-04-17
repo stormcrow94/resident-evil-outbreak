@@ -1,0 +1,38 @@
+Biohazard Outbreak — public WAN deploy
+======================================
+
+Set your public IP in docker-compose.yml: `PUBLIC_IP` (override via environment `PUBLIC_IP`).
+
+Changes from upstream (corbin-zip/bioserver-docker)
+--------------------------------------------------
+- Dockerfile: FROM debian:bullseye-slim (not debian:latest) for PHP 7.4 + JDK 17 packages.
+- Dockerfile: Apache/APR tarballs use archive.apache.org (dlcdn 404 for old versions).
+- config/entrypoint.sh: PUBLIC_IP env for dnsmasq + bioserver configs.
+- docker-compose.yml: MariaDB volume mysql_data; ports 53/udp, 80, 443, 8200/8300/8590/8690 TCP+UDP.
+- Port 53: only UDP mapped (TCP/53 failed with "address in use" on some hosts; DNS over UDP is normal).
+
+Router / firewall
+-----------------
+Forward to this machine’s LAN IP (same host running Docker):
+- UDP 53 (DNS for PCSX2)
+- TCP 80, 443
+- TCP and UDP: 8200, 8300, 8590, 8690
+
+Players (PCSX2 on Windows)
+--------------------------
+Set primary DNS to: YOUR_PUBLIC_IP (same value as PUBLIC_IP). No hosts-file edits required if DNS works.
+
+If your WAN IP changes
+----------------------
+Edit PUBLIC_IP in docker-compose.yml, then recreate the container. If configs do not update (first-run already ran), exec into the container and sed the same files as entrypoint, or remove the container and fix MySQL duplicate-import issues (see upstream caveats).
+
+Verify from any PC
+------------------
+nslookup gate1.jp.dnas.playstation.org YOUR_PUBLIC_IP
+Should return YOUR_PUBLIC_IP
+
+Commands
+--------
+cd /path/to/resident-evil-outbreak
+docker compose up -d
+docker logs -f bioserver
