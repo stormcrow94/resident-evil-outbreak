@@ -1,7 +1,8 @@
 Biohazard Outbreak — public WAN deploy
 ======================================
 
-Set your real public IP in docker-compose.yml: `PUBLIC_IP` (override via environment `PUBLIC_IP`).
+Set your real public IP in docker-compose.yml: `PUBLIC_IP` (with plain `docker run`, pass `-e PUBLIC_IP=...`).
+Note: docker-compose.yml sets the value literally, so exporting PUBLIC_IP in your shell does not override it.
 
 Examples in this file use 203.0.113.42 — that address is from RFC 5737 (TEST-NET-3), reserved for documentation only. It is not routable on the public Internet. Replace every example with your actual WAN IP.
 
@@ -26,7 +27,9 @@ Set primary DNS to the same value as PUBLIC_IP (example only: 203.0.113.42). No 
 
 If your WAN IP changes
 ----------------------
-Edit PUBLIC_IP in docker-compose.yml, then recreate the container. If configs do not update (first-run already ran), exec into the container and sed the same files as entrypoint, or remove the container and fix MySQL duplicate-import issues (see upstream caveats).
+Edit PUBLIC_IP in docker-compose.yml, then recreate the container:
+  docker compose up -d --force-recreate
+A plain restart is not enough: the first-run marker (/root/already-configured) lives inside the container, so only a new container re-applies PUBLIC_IP. The mysql_data volume is kept, and the SQL import uses IF NOT EXISTS, so re-running it on the existing database is harmless.
 
 Verify from any PC (example — substitute your WAN IP)
 -------------------------------------------------------
